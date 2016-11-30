@@ -1,8 +1,13 @@
 package com.rayworks.todolist;
 
 import android.app.Application;
+import android.view.View;
 
+import com.rayworks.todolist.ui.ViewBindingForView;
 import com.squareup.leakcanary.LeakCanary;
+
+import org.robobinding.binder.BinderFactory;
+import org.robobinding.binder.BinderFactoryBuilder;
 
 import timber.log.Timber;
 
@@ -11,6 +16,9 @@ import timber.log.Timber;
  */
 
 public class DroidApp extends Application {
+
+    private BinderFactory reusableBinderFactory;
+    private static DroidApp app;
 
     @Override
     public void onCreate() {
@@ -26,5 +34,19 @@ public class DroidApp extends Application {
             }
             LeakCanary.install(this);
         }
+
+        reusableBinderFactory = new BinderFactoryBuilder()
+                .add(new ViewBindingForView().extend(View.class))
+                .build();
+
+        app = this;
+    }
+
+    public BinderFactory getReusableBinderFactory() {
+        return reusableBinderFactory;
+    }
+
+    public static DroidApp get() {
+        return app;
     }
 }

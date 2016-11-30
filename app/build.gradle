@@ -1,17 +1,29 @@
-repositories {
-    flatDir {
-        dirs 'libs'
+buildscript {
+
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+
+        mavenLocal()
+
+        mavenCentral()
+        maven() {
+            name 'RoboBinding AspectJPlugin Maven Repository'
+            url "https://github.com/RoboBinding/RoboBinding-aspectj-plugin/raw/master/mavenRepo"
+        }
     }
 
-    mavenLocal()
-    //jcenter()
-
-    /*dependencies {
-        classpath 'com.jakewharton:butterknife-gradle-plugin:8.4.0'
-    }*/
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.+'
+        classpath 'org.robobinding:aspectj-plugin:0.8.+'
+    }
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'org.robobinding.android-aspectj'
 //apply plugin: 'com.jakewharton.butterknife'
 
 android {
@@ -31,7 +43,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'org/robobinding/internal/java_beans/messages.properties'
+    }
+
+    lintOptions {
+        disable 'UnusedAttribute', 'ValidFragment', 'GradleDependency', 'OnClick', 'MissingPrefix', 'MenuTitle'
+    }
 }
+
+def robobindingVersion = "0.8.10"
+/*ext {
+    robobindingVersion = '0.8.14'
+    //robobindingVersion = '0.8.11'
+}*/
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -42,9 +68,8 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     testCompile 'junit:junit:4.12'
 
-
-    compile 'com.jakewharton:butterknife:8.4.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+    //compile 'com.jakewharton:butterknife:8.4.0'
+    //annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
 
     compile 'com.jakewharton.timber:timber:4.1.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
@@ -54,6 +79,21 @@ dependencies {
 
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     compile 'io.reactivex:rxandroid:1.2.0'
+
+
+    compile "org.robobinding:robobinding:$robobindingVersion"
+    aspectPath "org.robobinding:robobinding:$robobindingVersion"
+
+    //alternatively we can use with-aop-and-dependencies jar(RoboBinding provides a minimal Proguarded with-aop-and-dependencies jar.).
+    compile("org.robobinding:robobinding:$robobindingVersion:with-aop-and-dependencies") {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+    aspectPath("org.robobinding:robobinding:$robobindingVersion:with-aop-and-dependencies") {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+
+    //compile "org.robobinding:extras:${robobindingVersion}"
+    apt "org.robobinding:codegen:$robobindingVersion"
 
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
